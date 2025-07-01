@@ -87,6 +87,16 @@ class ProductCard extends StatelessWidget {
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Icon(Icons.edit, color: Colors.lightBlue,),
+                SizedBox(width: 8,),
+                Icon(Icons.delete, color: Colors.red)
+              ],
+            ),
+          )
         ],
       ),
     );
