@@ -5,7 +5,7 @@ class ProductModel {
     try {
       const pool = await getConnection();
       const result = await pool
-        .requst()
+        .request()
         .query("SELECT * FROM PRODUCTS ORDER BY PRODUCTID");
       return result.recordset;
     } catch (error) {
@@ -49,10 +49,11 @@ class ProductModel {
     try {
       const { productName, price, stock } = productData;
       const pool = await getConnection();
-      const result = await request()
+      const result = await pool
+        .request()
         .input("id", sql.Int, id)
         .input("productName", sql.NVarChar(100), productName)
-        .input("price", sql.Decimal, price)
+        .input("price", sql.Decimal(10, 2), price)
         .input("stock", sql.Int, stock).query(`
                 UPDATE PRODUCTS
                 SET PRODUCTNAME = @productName, PRICE = @price, STOCK = @stock
@@ -68,10 +69,11 @@ class ProductModel {
   static async deleteProduct(id) {
     try {
       const pool = await getConnection();
-      const result = await request()
+      const result = await pool
+        .request()
         .input("id", sql.Int, id)
         .query("DELETE FROM PRODUCTS WHERE PRODUCTID = @id");
-      return result.recordset[0] > 0;
+      return result.rowsAffected[0] > 0;
     } catch (error) {
       throw new Error(`Error deleting product ${error.message}`);
     }

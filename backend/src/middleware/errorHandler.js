@@ -5,7 +5,7 @@ const errorHandler = (err, req, res, next) => {
   let error = {
     success: false,
     message: err.message || "Internal Server Error",
-    ...err(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   };
   //SQL Server specific Error
   if (err.code) {

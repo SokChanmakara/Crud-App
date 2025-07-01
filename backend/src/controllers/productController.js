@@ -43,7 +43,7 @@ class ProductController {
   static async createProduct(req, res, next) {
     try {
       const { productName, price, stock } = req.body;
-      if (!productName || !price || !stock == undefined) {
+      if (!productName || !price || stock == undefined) {
         return res.status(400).json({
           success: false,
           message: "Product name, price and stock are required",
@@ -65,7 +65,7 @@ class ProductController {
       res.status(201).json({
         success: true,
         data: newProduct,
-        message: "Proudct created successfully",
+        message: "Product created successfully",
       });
     } catch (error) {
       next(error);
@@ -78,14 +78,14 @@ class ProductController {
       const { productName, price, stock } = req.body;
 
       if (!id || isNaN(id)) {
-        res.status(400).json({
+        return res.status(400).json({
           success: false,
           message: "Invalid product ID",
         });
       }
 
-      if (!productName || !price || !stock == undefined) {
-        res.status(400).json({
+      if (!productName || !price || stock == undefined) {
+        return res.status(400).json({
           success: false,
           message: " Product Name ,price and stock are required",
         });
@@ -99,7 +99,7 @@ class ProductController {
 
       const existingProduct = await ProductModel.getProductById(parseInt(id));
       if (!existingProduct) {
-        res.status(404).json({
+        return res.status(404).json({
           success: false,
           message: "Product NOT FOUND",
         });
