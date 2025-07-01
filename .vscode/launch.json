@@ -1,0 +1,11 @@
+{
+  "configurations": [
+    {
+      "name": "Flutter (lib/feature/products/domain/entities/product.dart)",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "frontend",
+      "program": "lib/feature/products/domain/entities/product.dart"
+    }
+  ]
+}
