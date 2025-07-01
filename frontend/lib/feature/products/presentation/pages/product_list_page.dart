@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/feature/products/presentation/widgets/product_card.dart';
 
 class ProductListPage extends StatelessWidget {
   const ProductListPage({super.key});
@@ -16,11 +17,16 @@ class ProductListPage extends StatelessWidget {
           )
         ],
       ),
-      body: Container(),
+      body: Container(
+        child: ProductCard(),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: (){},
-        child: Icon(Icons.add)
-        ),        
+        backgroundColor: const Color(0xFF94e0b2),
+        foregroundColor: Colors.white,
+        child: Icon(Icons.add),
+        ),
+                
     );
   }
 }
