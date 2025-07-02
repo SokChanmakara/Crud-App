@@ -121,7 +121,7 @@ class _AddProductPageState extends ConsumerState<AddProductPage> {
 
       final product = ProductEntity(
         name: _nameController.text.trim(),
-        price: int.parse(_priceController.text),
+        price: double.parse(_priceController.text).toInt(),
         stock: int.parse(_stockController.text),
       );
 

@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/feature/products/domain/entities/product_entity.dart';
+import 'package:frontend/feature/products/presentation/providers/product_list_provider.dart';
 import 'package:frontend/core/constants/route_paths.dart';
 
-class ProductDetailPage extends StatelessWidget {
+class ProductDetailPage extends ConsumerWidget {
   final String productId;
 
   const ProductDetailPage({super.key, required this.productId});
 
   @override
-  Widget build(BuildContext context) {
-    // In a real app, you'd fetch the product by ID from your data source
-    final product = ProductEntity(
-      name: 'Wireless Headphones',
-      price: 30,
-      stock: 20,
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get the product data from the provider
+    final productState = ref.watch(productListProvider);
+    final product = productState.products.firstWhere(
+      (p) => p.id == productId,
+      orElse:
+          () => ProductEntity(
+            id: productId,
+            name: 'Product Not Found',
+            price: 0,
+            stock: 0,
+          ),
     );
 
     return Scaffold(
@@ -93,7 +101,7 @@ class ProductDetailPage extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      _showDeleteDialog(context);
+                      _showDeleteDialog(context, ref, product);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.redAccent,
@@ -112,25 +120,50 @@ class ProductDetailPage extends StatelessWidget {
     );
   }
 
-  void _showDeleteDialog(BuildContext context) {
+  void _showDeleteDialog(
+    BuildContext context,
+    WidgetRef ref,
+    ProductEntity product,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Delete Product'),
-          content: const Text('Are you sure you want to delete this product?'),
+          content: Text('Are you sure you want to delete "${product.name}"?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                context.go('/'); // Navigate back to product list
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Product deleted successfully')),
-                );
+
+                if (product.id != null) {
+                  // Call the delete function from the provider
+                  final success = await ref
+                      .read(productListProvider.notifier)
+                      .deleteProduct(product.id!);
+
+                  if (context.mounted) {
+                    if (success) {
+                      context.go('/'); // Navigate back to product list
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${product.name} deleted successfully'),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Failed to delete product'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                }
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('Delete'),

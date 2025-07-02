@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/feature/products/domain/entities/product_entity.dart';
+import 'package:frontend/feature/products/presentation/providers/product_list_provider.dart';
 import 'package:frontend/core/constants/route_paths.dart';
 
-class ProductCard extends StatelessWidget {
+class ProductCard extends ConsumerWidget {
   final ProductEntity? product;
   final String? productId;
   final VoidCallback? onDelete;
@@ -11,7 +13,7 @@ class ProductCard extends StatelessWidget {
   const ProductCard({super.key, this.product, this.productId, this.onDelete});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final currentProduct =
         product ??
         ProductEntity(name: 'Wireless Headphones', price: 30, stock: 20);
@@ -90,7 +92,12 @@ class ProductCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () {
-                    _showDeleteDialog(context, currentProduct.name);
+                    _showDeleteDialog(
+                      context,
+                      ref,
+                      currentProduct.name,
+                      currentProductId,
+                    );
                   },
                   child: Container(
                     padding: const EdgeInsets.all(8.0),
@@ -109,7 +116,12 @@ class ProductCard extends StatelessWidget {
     );
   }
 
-  void _showDeleteDialog(BuildContext context, String productName) {
+  void _showDeleteDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String productName,
+    String productId,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -122,11 +134,30 @@ class ProductCard extends StatelessWidget {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('$productName deleted successfully')),
-                );
+
+                // Call the delete function from the provider
+                final success = await ref
+                    .read(productListProvider.notifier)
+                    .deleteProduct(productId);
+
+                if (context.mounted) {
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('$productName deleted successfully'),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Failed to delete product'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('Delete'),

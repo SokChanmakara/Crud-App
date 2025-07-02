@@ -1,36 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/feature/products/domain/entities/product_entity.dart';
+import 'package:frontend/feature/products/presentation/providers/product_list_provider.dart';
 
-class EditProductPage extends StatefulWidget {
+class EditProductPage extends ConsumerStatefulWidget {
   final String productId;
 
   const EditProductPage({super.key, required this.productId});
 
   @override
-  State<EditProductPage> createState() => _EditProductPageState();
+  ConsumerState<EditProductPage> createState() => _EditProductPageState();
 }
 
-class _EditProductPageState extends State<EditProductPage> {
+class _EditProductPageState extends ConsumerState<EditProductPage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _priceController;
   late TextEditingController _stockController;
+  bool _isLoading = false;
+  ProductEntity? _product;
 
   @override
   void initState() {
     super.initState();
 
-    // In a real app, you'd fetch the product by ID from your data source
-    final product = ProductEntity(
-      name: 'Wireless Headphones',
-      price: 30,
-      stock: 20,
-    );
+    // Initialize controllers with empty values first
+    _nameController = TextEditingController();
+    _priceController = TextEditingController();
+    _stockController = TextEditingController();
 
-    _nameController = TextEditingController(text: product.name);
-    _priceController = TextEditingController(text: product.price.toString());
-    _stockController = TextEditingController(text: product.stock.toString());
+    // Load product data after widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadProductData();
+    });
+  }
+
+  void _loadProductData() {
+    final productState = ref.read(productListProvider);
+    try {
+      _product = productState.products.firstWhere(
+        (p) => p.id == widget.productId,
+      );
+
+      // Update controllers with real data
+      _nameController.text = _product?.name ?? '';
+      _priceController.text = _product?.price.toString() ?? '';
+      _stockController.text = _product?.stock.toString() ?? '';
+    } catch (e) {
+      // Product not found, keep empty controllers
+      print('Product not found: ${widget.productId}');
+    }
   }
 
   @override
@@ -103,17 +123,24 @@ class _EditProductPageState extends State<EditProductPage> {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: _updateProduct,
+                onPressed: _isLoading ? null : _updateProduct,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF94e0b2),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text('Update Product'),
+                child:
+                    _isLoading
+                        ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white),
+                        )
+                        : const Text('Update Product'),
               ),
               const SizedBox(height: 8),
               OutlinedButton(
-                onPressed: () => context.pop(),
+                onPressed: _isLoading ? null : () => context.pop(),
                 child: const Text('Cancel'),
               ),
             ],
@@ -123,13 +150,39 @@ class _EditProductPageState extends State<EditProductPage> {
     );
   }
 
-  void _updateProduct() {
-    if (_formKey.currentState!.validate()) {
-      // In a real app, you'd update the product in your data source
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Product updated successfully')),
+  Future<void> _updateProduct() async {
+    if (_formKey.currentState!.validate() && _product != null) {
+      setState(() => _isLoading = true);
+
+      final updatedProduct = _product!.copyWith(
+        name: _nameController.text.trim(),
+        price: double.parse(_priceController.text).toInt(),
+        stock: int.parse(_stockController.text),
       );
-      context.pop(); // Go back to previous page
+
+      final success = await ref
+          .read(productListProvider.notifier)
+          .updateProduct(updatedProduct);
+
+      setState(() => _isLoading = false);
+
+      if (success) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Product updated successfully')),
+          );
+          context.pop(); // Go back to previous page
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to update product'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 }
