@@ -17,6 +17,7 @@ A full-stack product management application built with Flutter frontend and Node
 - npm or yarn package manager
 - Microsoft SQL Server (Local or Remote)
 - SQL Server Management Studio (optional, for database management)
+- Docker
 
 ### **Frontend Requirements**
 
@@ -39,6 +40,7 @@ cd CrudApp
 #### **Install Dependencies**
 
 ```bash
+docker compose up -d
 cd backend
 npm install
 ```
@@ -79,7 +81,6 @@ npm run init-db
 #### **Start Backend Server**
 
 ```bash
-docker compose up -d
 cd backend
 npm start
 ```
