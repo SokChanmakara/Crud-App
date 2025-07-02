@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/feature/products/presentation/pages/product_list_page.dart';
+import 'package:frontend/router/main_route.dart';
 
-void main(){
+void main() {
   runApp(MyApp());
 }
 
@@ -9,9 +9,10 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      home: ProductListPage()
+      title: 'Product CRUD App',
+      routerConfig: AppRouter.router,
     );
   }
 }
