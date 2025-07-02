@@ -75,7 +75,8 @@ NODE_ENV=development
 Initialize the database and create sample data:
 
 ```bash
-npm run init-db
+cd backend
+node scripts/init-db.js
 ```
 
 #### **Start Backend Server**
