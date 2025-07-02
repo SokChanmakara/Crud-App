@@ -1,6 +1,6 @@
 -- Merging decision tree log ---
 application
-INJECTED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:3:5-35:19
+INJECTED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:3:5-36:19
 INJECTED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/debug/AndroidManifest.xml
 MERGED from [androidx.window:window:1.2.0] /mnt/mint-extra/ra-extra/.gradle/caches/8.10.2/transforms/5093ab42d2307deb2d7ac0b7f5718c38/transformed/jetified-window-1.2.0/AndroidManifest.xml:22:5-29:19
 MERGED from [androidx.window:window:1.2.0] /mnt/mint-extra/ra-extra/.gradle/caches/8.10.2/transforms/5093ab42d2307deb2d7ac0b7f5718c38/transformed/jetified-window-1.2.0/AndroidManifest.xml:22:5-29:19
@@ -21,8 +21,8 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /mnt/mint-e
 	android:name
 		INJECTED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml
 manifest
-ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:1:1-47:12
-MERGED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:1:1-47:12
+ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:1:1-48:12
+MERGED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:1:1-48:12
 INJECTED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/debug/AndroidManifest.xml:1:1-7:12
 INJECTED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/debug/AndroidManifest.xml:1:1-7:12
 INJECTED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/debug/AndroidManifest.xml:1:1-7:12
@@ -67,17 +67,17 @@ MERGED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/
 	android:name
 		ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:2:22-64
 queries
-ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:41:5-46:15
+ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:42:5-47:15
 intent#action:name:android.intent.action.PROCESS_TEXT+data:mimeType:text/plain
-ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:42:9-45:18
+ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:43:9-46:18
 action#android.intent.action.PROCESS_TEXT
-ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:43:13-72
+ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:44:13-72
 	android:name
-		ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:43:21-70
+		ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:44:21-70
 data
-ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:44:13-50
+ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:45:13-50
 	android:mimeType
-		ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:44:19-48
+		ADDED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/main/AndroidManifest.xml:45:19-48
 uses-sdk
 INJECTED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/debug/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /mnt/mint-extra/ra-extra/Code/CrudApp/frontend/android/app/src/debug/AndroidManifest.xml

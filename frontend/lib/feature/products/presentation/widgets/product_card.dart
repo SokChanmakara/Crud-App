@@ -142,21 +142,15 @@ class ProductCard extends ConsumerWidget {
                     .read(productListProvider.notifier)
                     .deleteProduct(productId);
 
-                if (context.mounted) {
-                  if (success) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('$productName deleted successfully'),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Failed to delete product'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
+                // Only show error if deletion failed
+                // Success message is handled by the ProductListPage listener
+                if (context.mounted && !success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Failed to delete product'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
                 }
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),

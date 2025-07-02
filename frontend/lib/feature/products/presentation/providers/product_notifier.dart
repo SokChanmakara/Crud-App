@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/feature/products/domain/entities/product_entity.dart';
 import 'package:frontend/feature/products/domain/usecases/get_products_usecase.dart';
@@ -11,6 +12,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
   final AddProductUseCase addProductUseCase;
   final UpdateProductUseCase updateProductUseCase;
   final DeleteProductUseCase deleteProductUseCase;
+  Timer? _debounceTimer;
 
   ProductNotifier({
     required this.getProductsUseCase,
@@ -18,6 +20,12 @@ class ProductNotifier extends StateNotifier<ProductState> {
     required this.updateProductUseCase,
     required this.deleteProductUseCase,
   }) : super(const ProductState());
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
 
   Future<void> loadProducts() async {
     state = state.copyWith(status: ProductStatus.loading);
@@ -30,12 +38,15 @@ class ProductNotifier extends StateNotifier<ProductState> {
             status: ProductStatus.error,
             errorMessage: failure.message,
           ),
-      (products) =>
-          state = state.copyWith(
-            status: ProductStatus.success,
-            products: products,
-            errorMessage: null,
-          ),
+      (products) {
+        final filteredProducts = _filterProducts(products, state.searchQuery);
+        state = state.copyWith(
+          status: ProductStatus.success,
+          products: products,
+          filteredProducts: filteredProducts,
+          errorMessage: null,
+        );
+      },
     );
   }
 
@@ -54,8 +65,13 @@ class ProductNotifier extends StateNotifier<ProductState> {
       },
       (newProduct) {
         final updatedProducts = [...state.products, newProduct];
+        final filteredProducts = _filterProducts(
+          updatedProducts,
+          state.searchQuery,
+        );
         state = state.copyWith(
           products: updatedProducts,
+          filteredProducts: filteredProducts,
           isAddingProduct: false,
           errorMessage: null,
         );
@@ -82,8 +98,13 @@ class ProductNotifier extends StateNotifier<ProductState> {
             state.products.map((p) {
               return p.id == updatedProduct.id ? updatedProduct : p;
             }).toList();
+        final filteredProducts = _filterProducts(
+          updatedProducts,
+          state.searchQuery,
+        );
         state = state.copyWith(
           products: updatedProducts,
+          filteredProducts: filteredProducts,
           isUpdatingProduct: false,
           errorMessage: null,
         );
@@ -108,8 +129,13 @@ class ProductNotifier extends StateNotifier<ProductState> {
       (_) {
         final updatedProducts =
             state.products.where((p) => p.id != id).toList();
+        final filteredProducts = _filterProducts(
+          updatedProducts,
+          state.searchQuery,
+        );
         state = state.copyWith(
           products: updatedProducts,
+          filteredProducts: filteredProducts,
           isDeletingProduct: false,
           errorMessage: null,
         );
@@ -120,5 +146,35 @@ class ProductNotifier extends StateNotifier<ProductState> {
 
   void clearError() {
     state = state.copyWith(errorMessage: null);
+  }
+
+  void searchProducts(String query) {
+    _debounceTimer?.cancel();
+
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      final filteredProducts = _filterProducts(state.products, query);
+      state = state.copyWith(
+        searchQuery: query,
+        filteredProducts: filteredProducts,
+      );
+    });
+  }
+
+  void clearSearch() {
+    _debounceTimer?.cancel();
+    state = state.copyWith(searchQuery: '', filteredProducts: state.products);
+  }
+
+  List<ProductEntity> _filterProducts(
+    List<ProductEntity> products,
+    String query,
+  ) {
+    if (query.isEmpty) {
+      return products;
+    }
+
+    return products.where((product) {
+      return product.name.toLowerCase().contains(query.toLowerCase());
+    }).toList();
   }
 }

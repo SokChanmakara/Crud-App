@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/feature/products/presentation/widgets/product_card.dart';
+import 'package:frontend/feature/products/presentation/widgets/search_bar_widget.dart';
 import 'package:frontend/feature/products/presentation/providers/product_list_provider.dart';
 import 'package:frontend/feature/products/presentation/providers/product_state.dart';
 import 'package:frontend/core/constants/route_paths.dart';
@@ -43,6 +44,19 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
           ),
         );
       }
+
+      // Show success message when a product is deleted
+      if (previous != null &&
+          previous.products.length > next.products.length &&
+          next.status == ProductStatus.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Product deleted successfully'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     });
 
     return Scaffold(
@@ -66,7 +80,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
         onPressed: () {
           context.push(RoutePaths.addProduct);
         },
-        backgroundColor: const Color(0xFF94e0b2),
+        backgroundColor: const Color.fromARGB(255, 40, 173, 93),
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
@@ -111,48 +125,144 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
 
       case ProductStatus.success:
         if (state.products.isEmpty) {
-          return const Center(
+          return RefreshIndicator(
+            onRefresh:
+                () => ref.read(productListProvider.notifier).loadProducts(),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  'No products found',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                SearchBarWidget(
+                  hintText: 'Search products by name...',
+                  initialValue: state.searchQuery,
+                  onChanged: (query) {
+                    ref
+                        .read(productListProvider.notifier)
+                        .searchProducts(query);
+                  },
+                  onClear: () {
+                    ref.read(productListProvider.notifier).clearSearch();
+                  },
                 ),
-                SizedBox(height: 8),
-                Text(
-                  'Add your first product using the + button',
-                  style: TextStyle(color: Colors.grey),
+                Expanded(
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 150), // Add some top spacing
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.inventory_2_outlined,
+                              size: 64,
+                              color: Colors.grey,
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              'No products found',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Add your first product using the + button',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           );
         }
+
         return RefreshIndicator(
           onRefresh:
               () => ref.read(productListProvider.notifier).loadProducts(),
-          child: ListView.builder(
-            itemCount: state.products.length,
-            itemBuilder: (context, index) {
-              final product = state.products[index];
-              return ProductCard(product: product, productId: product.id ?? '');
-            },
+          child: Column(
+            children: [
+              SearchBarWidget(
+                hintText: 'Search products by name...',
+                initialValue: state.searchQuery,
+                onChanged: (query) {
+                  ref.read(productListProvider.notifier).searchProducts(query);
+                },
+                onClear: () {
+                  ref.read(productListProvider.notifier).clearSearch();
+                },
+              ),
+              Expanded(
+                child:
+                    state.filteredProducts.isEmpty &&
+                            state.searchQuery.isNotEmpty
+                        ? _buildNoSearchResults()
+                        : ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          itemCount: state.filteredProducts.length,
+                          itemBuilder: (context, index) {
+                            final product = state.filteredProducts[index];
+                            return ProductCard(
+                              product: product,
+                              productId: product.id ?? '',
+                            );
+                          },
+                        ),
+              ),
+            ],
           ),
         );
 
       default:
-        return const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey),
-              SizedBox(height: 16),
-              Text('Welcome to Product Manager'),
+        return RefreshIndicator(
+          onRefresh:
+              () => ref.read(productListProvider.notifier).loadProducts(),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const [
+              SizedBox(height: 200), // Add some top spacing
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.shopping_cart_outlined,
+                      size: 64,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(height: 16),
+                    Text('Welcome to Product Manager'),
+                  ],
+                ),
+              ),
             ],
           ),
         );
     }
+  }
+
+  Widget _buildNoSearchResults() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off, size: 64, color: Colors.grey),
+          SizedBox(height: 16),
+          Text(
+            'No products found',
+            style: TextStyle(fontSize: 18, color: Colors.grey),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Try adjusting your search terms',
+            style: TextStyle(color: Colors.grey),
+          ),
+        ],
+      ),
+    );
   }
 }

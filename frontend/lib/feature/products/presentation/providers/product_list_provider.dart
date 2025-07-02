@@ -57,8 +57,9 @@ final productListProvider =
 // Individual product provider (for getting specific product)
 final productByIdProvider = Provider.family<ProductEntity?, String>((ref, id) {
   final products = ref.watch(productListProvider).products;
-  return products.firstWhere(
-    (product) => product.id == id,
-    orElse: () => throw Exception('Product not found'),
-  );
+  try {
+    return products.firstWhere((product) => product.id == id);
+  } catch (e) {
+    return null; // Return null instead of throwing exception
+  }
 });

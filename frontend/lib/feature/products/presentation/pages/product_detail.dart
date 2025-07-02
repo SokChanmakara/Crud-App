@@ -14,17 +14,27 @@ class ProductDetailPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Get the product data from the provider
     final productState = ref.watch(productListProvider);
-    final product = productState.products.firstWhere(
-      (p) => p.id == productId,
-      orElse:
-          () => ProductEntity(
-            id: productId,
-            name: 'Product Not Found',
-            price: 0,
-            stock: 0,
-          ),
-    );
 
+    // Find the product safely
+    ProductEntity? foundProduct;
+    try {
+      foundProduct = productState.products.firstWhere((p) => p.id == productId);
+    } catch (e) {
+      // Product not found, will show not found UI
+    }
+
+    if (foundProduct == null) {
+      return _buildProductNotFound(context);
+    }
+
+    return _buildProductDetail(context, ref, foundProduct);
+  }
+
+  Widget _buildProductDetail(
+    BuildContext context,
+    WidgetRef ref,
+    ProductEntity product,
+  ) {
     return Scaffold(
       appBar: AppBar(
         title: Text(product.name),
@@ -90,7 +100,7 @@ class ProductDetailPage extends ConsumerWidget {
                       context.push(RoutePaths.editProductPath(productId));
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF94e0b2),
+                      backgroundColor: const Color.fromARGB(255, 40, 173, 93),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
@@ -104,7 +114,7 @@ class ProductDetailPage extends ConsumerWidget {
                       _showDeleteDialog(context, ref, product);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
+                      backgroundColor: Colors.red[400],
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
@@ -113,7 +123,30 @@ class ProductDetailPage extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductNotFound(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Product Not Found'), centerTitle: true),
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: Colors.red),
+            SizedBox(height: 16),
+            Text(
+              'Product Not Found',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'The product you\'re looking for doesn\'t exist.',
+              style: TextStyle(color: Colors.grey),
+            ),
           ],
         ),
       ),
@@ -140,28 +173,49 @@ class ProductDetailPage extends ConsumerWidget {
               onPressed: () async {
                 Navigator.of(context).pop();
 
-                if (product.id != null) {
-                  // Call the delete function from the provider
-                  final success = await ref
-                      .read(productListProvider.notifier)
-                      .deleteProduct(product.id!);
+                // Show loading indicator
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          SizedBox(width: 16),
+                          Text('Deleting product...'),
+                        ],
+                      ),
+                    ),
+                  );
+                }
 
-                  if (context.mounted) {
-                    if (success) {
-                      context.go('/'); // Navigate back to product list
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('${product.name} deleted successfully'),
-                        ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Failed to delete product'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
+                // Call the delete function and await result
+                final success = await ref
+                    .read(productListProvider.notifier)
+                    .deleteProduct(productId);
+
+                if (context.mounted) {
+                  // Hide loading snackbar
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${product.name} deleted successfully'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    context.pop(); // Return to product list
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Failed to delete product'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
                   }
                 }
               },

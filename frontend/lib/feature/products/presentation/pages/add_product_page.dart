@@ -90,7 +90,7 @@ class _AddProductPageState extends ConsumerState<AddProductPage> {
               ElevatedButton(
                 onPressed: _isLoading ? null : _saveProduct,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF94e0b2),
+                  backgroundColor: const Color.fromARGB(255, 40, 173, 93),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
