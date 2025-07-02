@@ -12,6 +12,10 @@
         "source": "com.example.frontend.app-main-21:/drawable-v21/launch_background.xml"
     },
     {
+        "merged": "com.example.frontend.app-debug-26:/xml_network_security_config.xml.flat",
+        "source": "com.example.frontend.app-main-21:/xml/network_security_config.xml"
+    },
+    {
         "merged": "com.example.frontend.app-debug-26:/mipmap-xxhdpi_ic_launcher.png.flat",
         "source": "com.example.frontend.app-main-21:/mipmap-xxhdpi/ic_launcher.png"
     },

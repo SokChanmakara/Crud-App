@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:frontend/feature/products/domain/entities/product_entity.dart';
+import 'package:frontend/feature/products/presentation/providers/product_list_provider.dart';
 
-class AddProductPage extends StatefulWidget {
+class AddProductPage extends ConsumerStatefulWidget {
   const AddProductPage({super.key});
 
   @override
-  State<AddProductPage> createState() => _AddProductPageState();
+  ConsumerState<AddProductPage> createState() => _AddProductPageState();
 }
 
-class _AddProductPageState extends State<AddProductPage> {
+class _AddProductPageState extends ConsumerState<AddProductPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
   final _stockController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -84,17 +88,24 @@ class _AddProductPageState extends State<AddProductPage> {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: _saveProduct,
+                onPressed: _isLoading ? null : _saveProduct,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF94e0b2),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text('Add Product'),
+                child:
+                    _isLoading
+                        ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white),
+                        )
+                        : const Text('Add Product'),
               ),
               const SizedBox(height: 8),
               OutlinedButton(
-                onPressed: () => context.pop(),
+                onPressed: _isLoading ? null : () => context.pop(),
                 child: const Text('Cancel'),
               ),
             ],
@@ -104,13 +115,36 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
-  void _saveProduct() {
+  Future<void> _saveProduct() async {
     if (_formKey.currentState!.validate()) {
-      // In a real app, you'd save the product to your data source
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Product added successfully')),
+      setState(() => _isLoading = true);
+
+      final product = ProductEntity(
+        name: _nameController.text.trim(),
+        price: int.parse(_priceController.text),
+        stock: int.parse(_stockController.text),
       );
-      context.pop(); // Go back to previous page
+
+      final success = await ref
+          .read(productListProvider.notifier)
+          .addProduct(product);
+
+      setState(() => _isLoading = false);
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Product added successfully')),
+        );
+        context.pop(); // Go back to previous page
+      } else {
+        // Error handling is done through the provider listener in the product list page
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to add product'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 }

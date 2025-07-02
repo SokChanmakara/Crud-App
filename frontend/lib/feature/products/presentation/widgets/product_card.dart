@@ -6,8 +6,9 @@ import 'package:frontend/core/constants/route_paths.dart';
 class ProductCard extends StatelessWidget {
   final ProductEntity? product;
   final String? productId;
+  final VoidCallback? onDelete;
 
-  const ProductCard({super.key, this.product, this.productId});
+  const ProductCard({super.key, this.product, this.productId, this.onDelete});
 
   @override
   Widget build(BuildContext context) {
