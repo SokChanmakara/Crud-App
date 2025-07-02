@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:frontend/feature/products/presentation/widgets/product_card.dart';
-import 'package:frontend/feature/products/presentation/widgets/search_bar_widget.dart';
+import 'package:frontend/feature/products/presentation/widgets/loading_state_widget.dart';
+import 'package:frontend/feature/products/presentation/widgets/error_state_widget.dart';
+import 'package:frontend/feature/products/presentation/widgets/product_list_content_widget.dart';
 import 'package:frontend/feature/products/presentation/providers/product_list_provider.dart';
 import 'package:frontend/feature/products/presentation/providers/product_state.dart';
 import 'package:frontend/core/constants/route_paths.dart';
@@ -90,131 +91,21 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
   Widget _buildBody(ProductState state) {
     switch (state.status) {
       case ProductStatus.loading:
-        return const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Loading products...'),
-            ],
-          ),
-        );
+        return const LoadingStateWidget(message: 'Loading products...');
 
       case ProductStatus.error:
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Error: ${state.errorMessage}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.red),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed:
-                    () => ref.read(productListProvider.notifier).loadProducts(),
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
+        return ErrorStateWidget(
+          errorMessage: state.errorMessage ?? 'Unknown error',
+          onRetry: () => ref.read(productListProvider.notifier).loadProducts(),
         );
 
       case ProductStatus.success:
-        if (state.products.isEmpty) {
-          return RefreshIndicator(
-            onRefresh:
-                () => ref.read(productListProvider.notifier).loadProducts(),
-            child: Column(
-              children: [
-                SearchBarWidget(
-                  hintText: 'Search products by name...',
-                  initialValue: state.searchQuery,
-                  onChanged: (query) {
-                    ref
-                        .read(productListProvider.notifier)
-                        .searchProducts(query);
-                  },
-                  onClear: () {
-                    ref.read(productListProvider.notifier).clearSearch();
-                  },
-                ),
-                Expanded(
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: const [
-                      SizedBox(height: 150), // Add some top spacing
-                      Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.inventory_2_outlined,
-                              size: 64,
-                              color: Colors.grey,
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'No products found',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Add your first product using the + button',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return RefreshIndicator(
+        return ProductListContentWidget(
+          products: state.products,
+          filteredProducts: state.filteredProducts,
+          searchQuery: state.searchQuery,
           onRefresh:
               () => ref.read(productListProvider.notifier).loadProducts(),
-          child: Column(
-            children: [
-              SearchBarWidget(
-                hintText: 'Search products by name...',
-                initialValue: state.searchQuery,
-                onChanged: (query) {
-                  ref.read(productListProvider.notifier).searchProducts(query);
-                },
-                onClear: () {
-                  ref.read(productListProvider.notifier).clearSearch();
-                },
-              ),
-              Expanded(
-                child:
-                    state.filteredProducts.isEmpty &&
-                            state.searchQuery.isNotEmpty
-                        ? _buildNoSearchResults()
-                        : ListView.builder(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          itemCount: state.filteredProducts.length,
-                          itemBuilder: (context, index) {
-                            final product = state.filteredProducts[index];
-                            return ProductCard(
-                              product: product,
-                              productId: product.id ?? '',
-                            );
-                          },
-                        ),
-              ),
-            ],
-          ),
         );
 
       default:
@@ -243,26 +134,5 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
           ),
         );
     }
-  }
-
-  Widget _buildNoSearchResults() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.search_off, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'No products found',
-            style: TextStyle(fontSize: 18, color: Colors.grey),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Try adjusting your search terms',
-            style: TextStyle(color: Colors.grey),
-          ),
-        ],
-      ),
-    );
   }
 }

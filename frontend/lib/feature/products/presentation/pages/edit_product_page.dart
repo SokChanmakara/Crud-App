@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/feature/products/domain/entities/product_entity.dart';
 import 'package:frontend/feature/products/presentation/providers/product_list_provider.dart';
+import 'package:frontend/feature/products/presentation/widgets/product_form_widget.dart';
+import 'package:frontend/feature/products/presentation/widgets/product_action_buttons_widget.dart';
 
 class EditProductPage extends ConsumerStatefulWidget {
   final String productId;
@@ -67,84 +69,24 @@ class _EditProductPageState extends ConsumerState<EditProductPage> {
       appBar: AppBar(title: const Text('Edit Product'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Product Name',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a product name';
-                  }
-                  return null;
-                },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: ProductFormWidget(
+                formKey: _formKey,
+                nameController: _nameController,
+                priceController: _priceController,
+                stockController: _stockController,
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _priceController,
-                decoration: const InputDecoration(
-                  labelText: 'Price (\$)',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a price';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _stockController,
-                decoration: const InputDecoration(
-                  labelText: 'Stock Quantity',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter stock quantity';
-                  }
-                  if (int.tryParse(value) == null) {
-                    return 'Please enter a valid number';
-                  }
-                  return null;
-                },
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _updateProduct,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 40, 173, 93),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child:
-                    _isLoading
-                        ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(color: Colors.white),
-                        )
-                        : const Text('Update Product'),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton(
-                onPressed: _isLoading ? null : () => context.pop(),
-                child: const Text('Cancel'),
-              ),
-            ],
-          ),
+            ),
+            ProductActionButtonsWidget(
+              isLoading: _isLoading,
+              onSave: _updateProduct,
+              onCancel: () => context.pop(),
+              saveButtonText: 'Update Product',
+            ),
+          ],
         ),
       ),
     );
