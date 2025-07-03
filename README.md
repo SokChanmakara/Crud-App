@@ -3,7 +3,7 @@
 A full-stack product management application built with Flutter frontend and Node.js/Express backend using Microsoft SQL Server database.
 
 # DEMO
-!(Atl Text)(demo.gif)
+!(Alt Text)(demo.gif)
 
 ## 🏗️ **Architecture**
 
