@@ -2,6 +2,9 @@
 
 A full-stack product management application built with Flutter frontend and Node.js/Express backend using Microsoft SQL Server database.
 
+# DEMO
+!(Atl Text)(demo.gif)
+
 ## 🏗️ **Architecture**
 
 - **Frontend**: Flutter (Dart) with Riverpod state management
