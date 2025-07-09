@@ -63,7 +63,7 @@ Edit the `.env` file with your database credentials:
 DB_SERVER=localhost
 DB_DATABASE=CrudAppDB
 DB_USER=sa
-DB_PASSWORD=from docker compose
+DB_PASSWORD=Admin@123456
 DB_PORT=1433
 DB_ENCRYPT=true
 DB_TRUST_SERVER_CERTIFICATE=true
